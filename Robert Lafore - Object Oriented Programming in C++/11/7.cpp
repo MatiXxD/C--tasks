@@ -1,0 +1,150 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <iomanip>
+#include <cstdlib>
+using namespace std;
+
+class BMoney {
+
+private:
+	long double money;
+
+public:
+	BMoney() : money(0.0) {}
+	BMoney(long double m) : money(m) {}
+
+	void setMoney(string str) {
+		money = mstold(str);
+	}
+
+	void putMoney() {
+		cout << ldtoms(money);
+	}
+
+	BMoney operator + (BMoney m2) {
+		return BMoney(money + m2.money);
+	}
+
+	BMoney operator - (BMoney m2) {
+		return BMoney(money - m2.money);
+	}
+
+	BMoney operator * (double mlt) {
+		return BMoney(money * mlt);
+	}
+
+	BMoney operator / (double div) {
+		if (div == 0)
+			exit(1);
+		return BMoney(money / div);
+	}
+
+	long double mstold(string str);
+	string ldtoms(long double val);
+
+	friend long double operator * (double, BMoney&);
+	friend long double operator / (double, BMoney&);
+	friend long double round(BMoney&);
+
+};
+
+long double BMoney::mstold(string str) {
+
+	stringstream stream;
+	long double res;
+
+	str.erase(0, 1);
+	int pos = str.find(",");
+	while (pos != string::npos) {
+		str.erase(pos, 1);
+		pos = str.find(",");
+	}
+
+	stream << str;
+	stream >> res;
+	return res;
+
+}
+
+string BMoney::ldtoms(long double val) {
+
+	stringstream stream;
+	string str;
+	stream << setprecision(2) << setiosflags(ios::fixed) << val;
+	stream >> str;
+
+	int pos = str.size() - 6;
+	while (pos > 0) {
+		str.insert(pos, ",");
+		pos -= 3;
+	}
+	str.insert(0, "$");
+
+	return str;
+
+}
+
+long double operator * (double dmoney, BMoney& bmoney) {
+
+	return dmoney * bmoney.money;
+
+}
+
+long double operator / (double dmoney, BMoney& bmoney) {
+
+	return dmoney / bmoney.money;
+
+}
+
+long double round(BMoney& bmoney) {
+
+	double remainder = bmoney.money - static_cast<int>(bmoney.money);
+	remainder = remainder >= 0.5 ? 1.0 : 0.0;
+
+	return remainder + static_cast<int>(bmoney.money);
+
+}
+
+
+int main() {
+
+	char answer;
+	BMoney money1, money2, money3;
+	string val1, val2;
+	double f;
+
+	do {
+
+		cout << "Enter first value ($1,234,567,890,123.99): ";
+		cin >> val1; money1.setMoney(val1);
+		cout << "Enter second value ($1,234,567,890,123.99): ";
+		cin >> val2; money2.setMoney(val2);
+		cout << "Enter float value: ";
+		cin >> f;
+
+		money3 = money1 + money2;
+		cout << "m1+m2: "; money3.putMoney(); cout << endl;
+		money3 = money1 - money2;
+		cout << "m1-m2: "; money3.putMoney(); cout << endl;
+		money3 = money1 * f;
+		cout << "m1*f: "; money3.putMoney(); cout << endl;
+		money3 = money1 / f;
+		cout << "m1/f: "; money3.putMoney(); cout << endl;
+		money3 = f * money1;
+		cout << "m1*f: "; money3.putMoney(); cout << endl;
+		money3 = f / money1;
+		cout << "m1/f: "; money3.putMoney(); cout << endl;
+		money3 = round(money1);
+		cout << "round(m1): "; money3.putMoney(); cout << endl;
+		money3 = round(money2);
+		cout << "round(m2): "; money3.putMoney(); cout << endl;
+
+		cout << "Do you want to continue (y / n): ";
+		cin >> answer;
+
+	} while (answer == 'y');
+
+	return 0;
+
+}
